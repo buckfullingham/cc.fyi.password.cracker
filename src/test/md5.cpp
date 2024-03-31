@@ -4,11 +4,13 @@
 
 #include <fstream>
 
+namespace ns = cracker::md5;
+
 TEST_CASE("rfc reference tests") {
   auto md5 = [](std::string_view s) {
-    cracker::md5::calculator c;
+    ns::calculator c;
     auto md5 = c.end(s.data(), s.data() + s.size());
-    return cracker::md5::to_string(md5);
+    return ns::to_string(md5);
   };
 
   CHECK(md5("") == "d41d8cd98f00b204e9800998ecf8427e");
@@ -22,4 +24,11 @@ TEST_CASE("rfc reference tests") {
   CHECK(md5("1234567890123456789012345678901234567890"
             "1234567890123456789012345678901234567890") ==
         "57edf4a22be3c955ac49da2e2107b67a");
+}
+
+TEST_CASE("md5 to_string / from_string") {
+  ns::calculator c;
+  auto md5 = c.end(nullptr, nullptr);
+
+  CHECK(md5 == ns::from_string(ns::to_string(md5)));
 }

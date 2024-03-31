@@ -3,7 +3,10 @@ include_directories(
 )
 
 add_executable(tests
+        brute_force.cpp
         md5.cpp
+        rainbow.cpp
+        settings.cpp
 )
 
 target_link_libraries(tests PRIVATE

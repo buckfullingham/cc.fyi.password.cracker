@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.20)
 project(password-cracker)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
-set(CMAKE_CXX_FLAGS_UBSAN "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=undefined")
-set(CMAKE_EXE_LINKER_FLAGS_UBSAN "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=undefined")
-set(CMAKE_CXX_FLAGS_ASAN "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
-set(CMAKE_EXE_LINKER_FLAGS_ASAN "${CMAKE_EXEC_LINKER_FLAGS_DEBUG} -fsanitize=address")
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+set(CMAKE_EXE_LINKER_FLAGS "-ltbb")
+
+set(CMAKE_CXX_FLAGS_UBSAN "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=undefined -fno-omit-frame-pointer")
+set(CMAKE_EXE_LINKER_FLAGS_UBSAN "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=undefined -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS_ASAN "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer -fno-common")
+set(CMAKE_EXE_LINKER_FLAGS_ASAN "${CMAKE_EXEC_LINKER_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer")
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
 #execute_process(COMMAND sleep 9999)
 

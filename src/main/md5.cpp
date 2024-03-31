@@ -1,6 +1,10 @@
 #include "md5.hpp"
 
 #include <bit>
+#include <cctype>
+#include <regex>
+#include <stdexcept>
+#include <utility>
 
 namespace {
 constexpr std::array<int, 64> s = {
@@ -44,16 +48,16 @@ char *unpack(std::uint64_t i, char *o) {
   return o;
 }
 
+std::uint32_t pack_int(const char *const chars) {
+  auto shift = [](const char c, const int s) -> std::uint32_t {
+    return static_cast<std::uint32_t>(static_cast<unsigned char>(c)) << s;
+  };
+  return shift(chars[0], 0) | shift(chars[1], 8) | shift(chars[2], 16) |
+         shift(chars[3], 24);
+}
+
 std::array<std::uint32_t, 16> pack_chunk(const char *const chars) {
   std::array<std::uint32_t, 16> result{};
-
-  auto pack_int = [](const char *const chars) -> std::uint32_t {
-    auto shift = [](const char c, const int s) -> std::uint32_t {
-      return static_cast<std::uint32_t>(static_cast<unsigned char>(c)) << s;
-    };
-    return shift(chars[0], 0) | shift(chars[1], 8) | shift(chars[2], 16) |
-           shift(chars[3], 24);
-  };
 
   for (int i = 0; i < result.size(); ++i)
     result[i] = pack_int(chars + i * 4);
@@ -151,5 +155,48 @@ cracker::md5::md5_t cracker::md5::calculator::end(const char *begin,
   add_int(std::get<1>(md5));
   add_int(std::get<2>(md5));
   add_int(std::get<3>(md5));
+  return result;
+}
+
+[[nodiscard]] cracker::md5::md5_t
+cracker::md5::from_string(std::string_view str) {
+  static const std::regex re("[0123456789abcdef]{32}|[0123456789ABCDEF]{32}");
+
+  if (!std::regex_match(str.begin(), str.end(), re))
+    throw std::runtime_error("bad md5 string");
+
+  auto nibble = [](unsigned char c) -> std::uint32_t {
+    switch (std::tolower(c)) {
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+      return 10 + (c - 'a');
+    default:
+      return c - '0';
+    }
+  };
+
+  md5_t result{};
+
+  std::get<0>(result) = nibble(str[1]) | (nibble(str[0])) << 4 |
+                        (nibble(str[3]) << 8) | (nibble(str[2]) << 12) |
+                        (nibble(str[5]) << 16) | (nibble(str[4]) << 20) |
+                        (nibble(str[7]) << 24) | (nibble(str[6]) << 28);
+  std::get<1>(result) = nibble(str[9]) | (nibble(str[8])) << 4 |
+                        (nibble(str[11]) << 8) | (nibble(str[10]) << 12) |
+                        (nibble(str[13]) << 16) | (nibble(str[12]) << 20) |
+                        (nibble(str[15]) << 24) | (nibble(str[14]) << 28);
+  std::get<2>(result) = nibble(str[17]) | (nibble(str[16])) << 4 |
+                        (nibble(str[19]) << 8) | (nibble(str[18]) << 12) |
+                        (nibble(str[21]) << 16) | (nibble(str[20]) << 20) |
+                        (nibble(str[23]) << 24) | (nibble(str[22]) << 28);
+  std::get<3>(result) = nibble(str[25]) | (nibble(str[24])) << 4 |
+                        (nibble(str[27]) << 8) | (nibble(str[26]) << 12) |
+                        (nibble(str[29]) << 16) | (nibble(str[28]) << 20) |
+                        (nibble(str[31]) << 24) | (nibble(str[30]) << 28);
+
   return result;
 }

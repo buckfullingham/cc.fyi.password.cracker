@@ -56,6 +56,14 @@ private:
 
 [[nodiscard]] std::string to_string(const md5_t &);
 
+/**
+ * Read 32 ascii encoded hex chars into an md5_t.  Supports either all upper
+ * case or all lower case characters.
+ * @return the md5
+ * @throws std::runtime_error if the string does not satisfy the correct format.
+ */
+[[nodiscard]] md5_t from_string(std::string_view);
+
 } // namespace cracker::md5
 
 #endif // CC_FYI_PASSWORD_CRACKER_MD5_HPP
